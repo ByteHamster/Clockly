@@ -31,8 +31,6 @@ import com.android.deskclock.ThemeUtils;
 
 import java.io.Serializable;
 
-import static com.android.deskclock.FabContainer.FAB_SHRINK_AND_EXPAND;
-
 public class TimerSetupView extends View {
     private final Paint arcPaint = new Paint();
     private final Paint textPaint = new Paint();
@@ -81,12 +79,12 @@ public class TimerSetupView extends View {
 
     private void updateTime() {
         seconds = Math.max(0, seconds);
-        while (seconds > 60) {
+        while (seconds >= 60) {
             seconds -= 60;
             minutes++;
         }
         minutes = Math.max(0, minutes);
-        while (minutes > 60) {
+        while (minutes >= 60) {
             minutes -= 60;
             hours++;
         }
@@ -94,7 +92,7 @@ public class TimerSetupView extends View {
 
         if (hasValidInput() != validValue && mFabContainer != null) {
             validValue = hasValidInput();
-            mFabContainer.updateFab(FAB_SHRINK_AND_EXPAND);
+            mFabContainer.updateFab(FabContainer.FAB_AND_BUTTONS_SHRINK_AND_EXPAND);
         }
         invalidate();
     }
@@ -225,5 +223,10 @@ public class TimerSetupView extends View {
         } else {
             return super.onTouchEvent(event);
         }
+    }
+
+    public void add15() {
+        seconds += 15;
+        updateTime();
     }
 }

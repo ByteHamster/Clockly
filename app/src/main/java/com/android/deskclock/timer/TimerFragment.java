@@ -316,12 +316,12 @@ public final class TimerFragment extends DeskClockFragment {
 
         } else if (mCurrentView == mCreateTimerView) {
             left.setClickable(true);
-            left.setText(R.string.timer_cancel);
-            left.setContentDescription(left.getResources().getString(R.string.timer_cancel));
-            // If no timers yet exist, the user is forced to create the first one.
-            left.setVisibility(hasTimers() ? VISIBLE : INVISIBLE);
+            left.setText("+15s");
+            left.setVisibility(VISIBLE);
 
-            right.setVisibility(INVISIBLE);
+            right.setClickable(true);
+            right.setText(R.string.timer_reset);
+            right.setVisibility(mCreateTimerView.hasValidInput() ? VISIBLE : INVISIBLE);
         }
     }
 
@@ -402,18 +402,15 @@ public final class TimerFragment extends DeskClockFragment {
 
             left.announceForAccessibility(getActivity().getString(R.string.timer_deleted));
         } else if (mCurrentView == mCreateTimerView) {
-            // Clicking the "cancel" button on the timer creation page returns to the timers list.
-            mCreateTimerView.reset();
-
-            animateToView(mTimersView, null, false);
-
-            left.announceForAccessibility(getActivity().getString(R.string.timer_canceled));
+            mCreateTimerView.add15();
         }
     }
 
     @Override
     public void onRightButtonClick(@NonNull Button right) {
-        if (mCurrentView != mCreateTimerView) {
+        if (mCurrentView == mCreateTimerView) {
+            mCreateTimerView.reset();
+        } else {
             animateToView(mCreateTimerView, null, true);
         }
     }
