@@ -365,7 +365,7 @@ public final class TimerFragment extends DeskClockFragment {
             try {
                 // Create the new timer.
                 final long timerLength = mCreateTimerView.getTimeInMillis();
-                final Timer timer = DataModel.getDataModel().addTimer(timerLength, "", false);
+                final Timer timer = DataModel.getDataModel().addTimer(timerLength, "", true);
                 Events.sendTimerEvent(R.string.action_create, R.string.label_deskclock);
 
                 // Start the new timer.
