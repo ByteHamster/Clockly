@@ -23,6 +23,7 @@ import android.graphics.Point;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import com.android.deskclock.FabContainer;
 import com.android.deskclock.R;
 import com.android.deskclock.ThemeUtils;
@@ -45,6 +46,12 @@ public class TimerSetupView extends TimerDrawer {
 
         knobPaint.setAntiAlias(true);
         knobPaint.setColor(ThemeUtils.resolveColor(getContext(), R.attr.colorAccent));
+
+        setButtonText("+ 15s");
+        setButtonAction(v -> {
+            seconds += 15;
+            updateTime();
+        });
     }
 
     @Override
@@ -156,10 +163,5 @@ public class TimerSetupView extends TimerDrawer {
         } else {
             return super.onTouchEvent(event);
         }
-    }
-
-    public void add15() {
-        seconds += 15;
-        updateTime();
     }
 }

@@ -315,9 +315,7 @@ public final class TimerFragment extends DeskClockFragment {
             right.setVisibility(VISIBLE);
 
         } else if (mCurrentView == mCreateTimerView) {
-            left.setClickable(true);
-            left.setText("+15s");
-            left.setVisibility(VISIBLE);
+            left.setVisibility(GONE);
 
             right.setClickable(true);
             right.setText(R.string.timer_reset);
@@ -401,8 +399,6 @@ public final class TimerFragment extends DeskClockFragment {
             }
 
             left.announceForAccessibility(getActivity().getString(R.string.timer_deleted));
-        } else if (mCurrentView == mCreateTimerView) {
-            mCreateTimerView.add15();
         }
     }
 

@@ -21,27 +21,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <com.android.deskclock.timer.TimerDrawer
+    <com.android.deskclock.timer.TimerDrawer
             android:id="@+id/timer_drawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
-        <Button
-            android:id="@+id/reset_add"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="64dp"
-            android:contentDescription="@string/timer_plus_one"
-            android:gravity="center"
-            android:scaleType="centerInside" />
-
-    </FrameLayout>
 
 </com.android.deskclock.timer.TimerItem>

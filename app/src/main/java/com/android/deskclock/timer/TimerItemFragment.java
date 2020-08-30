@@ -62,7 +62,7 @@ public class TimerItemFragment extends Fragment {
         }
 
         final TimerItem view = (TimerItem) inflater.inflate(R.layout.timer_item, container, false);
-        view.findViewById(R.id.reset_add).setOnClickListener(new ResetAddListener());
+        view.setButtonAction(new ResetAddListener());
         view.update(timer);
 
         return view;

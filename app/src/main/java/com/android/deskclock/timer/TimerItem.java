@@ -19,6 +19,7 @@ package com.android.deskclock.timer;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.SystemClock;
+import android.view.View;
 import androidx.core.view.ViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -40,10 +41,9 @@ import static android.R.attr.state_pressed;
  */
 public class TimerItem extends LinearLayout {
 
-    /** A button that either resets the timer or adds time to it, depending on its state. */
-    private Button mResetAddButton;
-
-    /** The last state of the timer that was rendered; used to avoid expensive operations. */
+    /**
+     * The last state of the timer that was rendered; used to avoid expensive operations.
+     */
     private Timer.State mLastState;
     private TimerDrawer timerDrawer;
 
@@ -59,7 +59,6 @@ public class TimerItem extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         timerDrawer = (TimerDrawer) findViewById(R.id.timer_drawer);
-        mResetAddButton = (Button) findViewById(R.id.reset_add);
     }
 
     /**
@@ -79,23 +78,25 @@ public class TimerItem extends LinearLayout {
         // Update some potentially expensive areas of the user interface only on state changes.
         if (timer.getState() != mLastState) {
             mLastState = timer.getState();
-            final Context context = getContext();
             switch (mLastState) {
                 case RESET:
-                case PAUSED: {
-                    mResetAddButton.setText(R.string.timer_reset);
-                    mResetAddButton.setContentDescription(null);
+                case PAUSED:
+                    timerDrawer.setButtonText(getContext().getString(R.string.timer_reset));
                     break;
-                }
                 case EXPIRED:
                 case MISSED:
-                case RUNNING: {
-                    final String addTimeDesc = context.getString(R.string.timer_plus_one);
-                    mResetAddButton.setText(R.string.timer_add_minute);
-                    mResetAddButton.setContentDescription(addTimeDesc);
+                case RUNNING:
+                    timerDrawer.setButtonText(getContext().getString(R.string.timer_add_minute));
                     break;
-                }
             }
         }
+    }
+
+    public void setButtonAction(View.OnClickListener onClickListener) {
+        timerDrawer.setButtonAction(onClickListener);
+    }
+
+    public void setButtonText(String text) {
+        timerDrawer.setButtonText(text);
     }
 }

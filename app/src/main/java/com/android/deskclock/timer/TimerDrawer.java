@@ -7,8 +7,12 @@ import android.graphics.Point;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import com.android.deskclock.R;
 
-public class TimerDrawer extends View {
+public class TimerDrawer extends FrameLayout {
+    Button button;
     private final Paint arcPaint = new Paint();
     private final Paint textPaint = new Paint();
 
@@ -33,6 +37,20 @@ public class TimerDrawer extends View {
         textPaint.setColor(0xffffffff);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTextSize(80);
+
+        View.inflate(getContext(), R.layout.timer_drawer_button, this);
+        button = findViewById(R.id.timer_drawer_button);
+        setWillNotDraw(false);
+    }
+
+    public void setButtonText(String text) {
+        button.setText(text);
+        button.setVisibility(View.VISIBLE);
+    }
+
+    public void setButtonAction(View.OnClickListener onClickListener) {
+        button.setOnClickListener(onClickListener);
+        button.setVisibility(View.VISIBLE);
     }
 
     @Override
