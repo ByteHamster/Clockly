@@ -597,8 +597,7 @@ public final class TimerFragment extends DeskClockFragment {
                     viewTreeObserver.removeOnPreDrawListener(this);
                 }
 
-                final View view = mTimersView.findViewById(R.id.timer_time);
-                final float distanceY = view != null ? view.getHeight() + view.getY() : 0;
+                final float distanceY = 0;
                 final float translationDistance = animateDown ? distanceY : -distanceY;
 
                 toView.setTranslationY(-translationDistance);

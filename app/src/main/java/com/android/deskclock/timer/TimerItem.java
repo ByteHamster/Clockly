@@ -40,23 +40,12 @@ import static android.R.attr.state_pressed;
  */
 public class TimerItem extends LinearLayout {
 
-    /** Displays the remaining time or time since expiration. */
-    private TextView mTimerText;
-
-    /** Formats and displays the text in the timer. */
-    private TimerTextController mTimerTextController;
-
-    /** Displays timer progress as a color circle that changes from white to red. */
-    private TimerCircleView mCircleView;
-
     /** A button that either resets the timer or adds time to it, depending on its state. */
     private Button mResetAddButton;
 
-    /** Displays the label associated with the timer. Tapping it presents an edit dialog. */
-    private TextView mLabelView;
-
     /** The last state of the timer that was rendered; used to avoid expensive operations. */
     private Timer.State mLastState;
+    private TimerDrawer timerDrawer;
 
     public TimerItem(Context context) {
         this(context, null);
@@ -69,18 +58,8 @@ public class TimerItem extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mLabelView = (TextView) findViewById(R.id.timer_label);
+        timerDrawer = (TimerDrawer) findViewById(R.id.timer_drawer);
         mResetAddButton = (Button) findViewById(R.id.reset_add);
-        mCircleView = (TimerCircleView) findViewById(R.id.timer_time);
-        mTimerText = (TextView) findViewById(R.id.timer_time_text);
-        mTimerTextController = new TimerTextController(mTimerText);
-
-        final Context c = mTimerText.getContext();
-        final int colorAccent = ThemeUtils.resolveColor(c, R.attr.colorAccent);
-        final int textColorPrimary = ThemeUtils.resolveColor(c, android.R.attr.textColorPrimary);
-        mTimerText.setTextColor(new ColorStateList(
-                new int[][] { { -state_activated, -state_pressed }, {} },
-                new int[] { textColorPrimary, colorAccent }));
     }
 
     /**
@@ -88,29 +67,13 @@ public class TimerItem extends LinearLayout {
      */
     void update(Timer timer) {
         // Update the time.
-        mTimerTextController.setTimeString(timer.getRemainingTime());
-
-        // Update the label if it changed.
-        final String label = timer.getLabel();
-        if (!TextUtils.equals(label, mLabelView.getText())) {
-            mLabelView.setText(label);
-        }
+        timerDrawer.setTime(timer.getRemainingTime());
 
         // Update visibility of things that may blink.
         final boolean blinkOff = SystemClock.elapsedRealtime() % 1000 < 500;
-        if (mCircleView != null) {
+        if (timerDrawer != null) {
             final boolean hideCircle = (timer.isExpired() || timer.isMissed()) && blinkOff;
-            mCircleView.setVisibility(hideCircle ? INVISIBLE : VISIBLE);
-
-            if (!hideCircle) {
-                // Update the progress of the circle.
-                mCircleView.update(timer);
-            }
-        }
-        if (!timer.isPaused() || !blinkOff || mTimerText.isPressed()) {
-            mTimerText.setAlpha(1f);
-        } else {
-            mTimerText.setAlpha(0f);
+            timerDrawer.setVisibility(hideCircle ? INVISIBLE : VISIBLE);
         }
 
         // Update some potentially expensive areas of the user interface only on state changes.
@@ -122,32 +85,14 @@ public class TimerItem extends LinearLayout {
                 case PAUSED: {
                     mResetAddButton.setText(R.string.timer_reset);
                     mResetAddButton.setContentDescription(null);
-                    mTimerText.setClickable(true);
-                    mTimerText.setActivated(false);
-                    mTimerText.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-                    ViewCompat.setAccessibilityDelegate(mTimerText, new ClickAccessibilityDelegate(
-                            context.getString(R.string.timer_start), true));
                     break;
                 }
+                case EXPIRED:
+                case MISSED:
                 case RUNNING: {
                     final String addTimeDesc = context.getString(R.string.timer_plus_one);
                     mResetAddButton.setText(R.string.timer_add_minute);
                     mResetAddButton.setContentDescription(addTimeDesc);
-                    mTimerText.setClickable(true);
-                    mTimerText.setActivated(false);
-                    mTimerText.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-                    ViewCompat.setAccessibilityDelegate(mTimerText, new ClickAccessibilityDelegate(
-                            context.getString(R.string.timer_pause)));
-                    break;
-                }
-                case EXPIRED:
-                case MISSED: {
-                    final String addTimeDesc = context.getString(R.string.timer_plus_one);
-                    mResetAddButton.setText(R.string.timer_add_minute);
-                    mResetAddButton.setContentDescription(addTimeDesc);
-                    mTimerText.setClickable(false);
-                    mTimerText.setActivated(true);
-                    mTimerText.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
                     break;
                 }
             }

@@ -20,28 +20,18 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 import com.android.deskclock.FabContainer;
 import com.android.deskclock.R;
 import com.android.deskclock.ThemeUtils;
 
 import java.io.Serializable;
 
-public class TimerSetupView extends View {
-    private final Paint arcPaint = new Paint();
-    private final Paint textPaint = new Paint();
-    private final Paint knobPaint = new Paint();
-
-    private RectF arcBounds = new RectF();
+public class TimerSetupView extends TimerDrawer {
     private boolean validValue = false;
-
-    private int hours = 0;
-    private int minutes = 0;
-    private int seconds = 0;
+    private final Paint knobPaint = new Paint();
 
     /** Updates to the fab are requested via this container. */
     private FabContainer mFabContainer;
@@ -53,18 +43,8 @@ public class TimerSetupView extends View {
     public TimerSetupView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        arcPaint.setAntiAlias(true);
-        arcPaint.setStyle(Paint.Style.STROKE);
-        arcPaint.setStrokeCap(Paint.Cap.ROUND);
-
-        textPaint.setAntiAlias(true);
-        textPaint.setColor(0xffffffff);
-        textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setTextSize(80);
-
         knobPaint.setAntiAlias(true);
         knobPaint.setColor(ThemeUtils.resolveColor(getContext(), R.attr.colorAccent));
-
     }
 
     @Override
@@ -140,56 +120,9 @@ public class TimerSetupView extends View {
 
         int size = Math.min(getWidth(), getHeight()) - 300;
         int radius = size / 2;
-        arcBounds.set((getWidth() - size) / 2, (getHeight() - size) / 2,
-                getWidth() - (getWidth() - size) / 2, getHeight() - (getHeight() - size) / 2);
-
-        arcPaint.setStrokeWidth(3);
-        arcPaint.setColor(0xffbbbbbb);
-
-        for (int i = 0; i < 60; i++) {
-            float innerMultiplier = (i % 15 == 0) ? 0.85f : (i % 5 == 0) ? 0.92f : 0.98f;
-            Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
-            Point p2 = radToPoint(i * 360.f/60.f, radius * 1.02f);
-            canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
-        }
-
-        int differenceHourRadius =  20;
-        float hourRadiusDelta = 0;
-
-        if (minutes > 55) {
-            hourRadiusDelta = (1.0f - 0.2f * (60 - minutes)) * differenceHourRadius;
-            arcBounds.left += hourRadiusDelta;
-            arcBounds.right -= hourRadiusDelta;
-            arcBounds.top += hourRadiusDelta;
-            arcBounds.bottom -= hourRadiusDelta;
-        }
-
-        arcPaint.setStrokeWidth(8);
-        arcPaint.setColor(0xffffffff);
         float angle = ((float) minutes / 60.0f) * 360.0f;
-        canvas.drawArc(arcBounds, -90, angle, false, arcPaint);
-
-        int hourColor = 0xffffffff;
-        float hoursSize = radius - hourRadiusDelta;
-        for (int i = 0; i < hours; i++) {
-            hoursSize -= differenceHourRadius;
-            arcPaint.setColor(hourColor);
-            canvas.drawCircle(getWidth() / 2, getHeight() / 2, hoursSize, arcPaint);
-            hourColor -= 0x20000000;
-            if ((hourColor & 0xf0000000) == 0x10000000) {
-                break;
-            }
-        }
-
         Point p = radToPoint(angle, radius);
         canvas.drawCircle(p.x, p.y, 40, knobPaint);
-
-        canvas.drawText(String.format("%02d:%02d:%02d", hours, minutes, seconds), getWidth() / 2,  getHeight() / 2, textPaint);
-    }
-
-    private Point radToPoint(float angle, float radius) {
-        return new Point((int) (getWidth()/2 + radius * Math.sin(-angle * Math.PI / 180 + Math.PI)),
-                    (int) (getHeight()/2 + radius * Math.cos(-angle* Math.PI / 180 + Math.PI)));
     }
 
     @Override

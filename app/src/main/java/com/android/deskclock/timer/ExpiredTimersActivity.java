@@ -168,11 +168,6 @@ public class ExpiredTimersActivity extends BaseActivity {
         timerItem.setId(timerId);
         mExpiredTimersView.addView(timerItem);
 
-        // Hide the label hint for expired timers.
-        final TextView labelView = (TextView) timerItem.findViewById(R.id.timer_label);
-        labelView.setHint(null);
-        labelView.setVisibility(TextUtils.isEmpty(timer.getLabel()) ? View.GONE : View.VISIBLE);
-
         // Add logic to the "Add 1 Minute" button.
         final View addMinuteButton = timerItem.findViewById(R.id.reset_add);
         addMinuteButton.setOnClickListener(new View.OnClickListener() {
