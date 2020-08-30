@@ -31,6 +31,7 @@ public class AlarmCreatorBar extends View {
     private float fontSize = 60;
     private Point touchDown = new Point();
     private boolean isTouching = false;
+    private float padding = 10;
 
     private boolean setupRunning = false;
     private int hours = 0;
@@ -60,9 +61,10 @@ public class AlarmCreatorBar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        padding = getHeight() / 20.0f;
 
         for (int i = 0; i < 24; i++) {
-            int y = (int) ((i + 0.5f) * getHeight() / 24.0);
+            int y = (int) ((i + 0.5f) * (getHeight() - 2 * padding) / 24.0 + padding);
             canvas.drawLine(0, y, 30, y, linesPaint);
         }
 
@@ -124,12 +126,19 @@ public class AlarmCreatorBar extends View {
     }
 
     private int[] posToTime(float pos) {
-        float touchHour = 24.0f * (pos / getHeight()) + 0.5f;
-        return new int[]{(int) touchHour, (int) (30 * Math.floor((touchHour % 1) * 2.0f))};
+        float touchHour = 24.0f * ((pos - padding) / (getHeight() - 2 * padding)) + 0.5f;
+        int hours = (int) touchHour;
+        int minutes = (int) (30 * Math.floor((touchHour % 1) * 2.0f));
+
+        if (hours >= 24) {
+            hours = 24;
+            minutes = 0;
+        }
+        return new int[]{Math.max(0, hours), Math.max(0, minutes)};
     }
 
     private float timeToPos(int hours, int minutes) {
-        return (float) ((hours + minutes / 60.f) * getHeight() / 24.0);
+        return (float) ((hours + minutes / 60.f) * (getHeight() - 2 * padding) / 24.0) + padding;
     }
 
     public void stopSetup() {
@@ -142,6 +151,9 @@ public class AlarmCreatorBar extends View {
     }
 
     public int getHours() {
+        if (hours == 24) {
+            return 0;
+        }
         return hours;
     }
 
