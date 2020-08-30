@@ -19,7 +19,13 @@ package com.android.deskclock.timer;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.RectF;
+import android.util.Log;
+import android.view.MotionEvent;
 import androidx.annotation.IdRes;
 import androidx.core.view.ViewCompat;
 import android.text.BidiFormatter;
@@ -45,18 +51,18 @@ import java.util.Arrays;
 import static com.android.deskclock.FabContainer.FAB_REQUEST_FOCUS;
 import static com.android.deskclock.FabContainer.FAB_SHRINK_AND_EXPAND;
 
-public class TimerSetupView extends LinearLayout implements View.OnClickListener,
-        View.OnLongClickListener {
-
-    private final int[] mInput = { 0, 0, 0, 0, 0, 0 };
-
+public class TimerSetupView extends View {
     private int mInputPointer = -1;
-    private CharSequence mTimeTemplate;
+    private final Paint arcPaint = new Paint();
+    private final Paint textPaint = new Paint();
+    private final Paint knobPaint = new Paint();
 
-    private TextView mTimeView;
-    private View mDeleteView;
-    private View mDividerView;
-    private TextView[] mDigitViews;
+    private RectF arcBounds = new RectF();
+    private boolean validValue = false;
+
+    private int hours = 0;
+    private int minutes = 0;
+    private int seconds = 0;
 
     /** Updates to the fab are requested via this container. */
     private FabContainer mFabContainer;
@@ -68,244 +74,64 @@ public class TimerSetupView extends LinearLayout implements View.OnClickListener
     public TimerSetupView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final BidiFormatter bf = BidiFormatter.getInstance(false /* rtlContext */);
-        final String hoursLabel = bf.unicodeWrap(context.getString(R.string.hours_label));
-        final String minutesLabel = bf.unicodeWrap(context.getString(R.string.minutes_label));
-        final String secondsLabel = bf.unicodeWrap(context.getString(R.string.seconds_label));
+        arcPaint.setAntiAlias(true);
+        arcPaint.setStyle(Paint.Style.STROKE);
+        arcPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        // Create a formatted template for "00h 00m 00s".
-        mTimeTemplate = TextUtils.expandTemplate("^1^4 ^2^5 ^3^6",
-                bf.unicodeWrap("^1"),
-                bf.unicodeWrap("^2"),
-                bf.unicodeWrap("^3"),
-                FormattedTextUtils.formatText(hoursLabel, new RelativeSizeSpan(0.5f)),
-                FormattedTextUtils.formatText(minutesLabel, new RelativeSizeSpan(0.5f)),
-                FormattedTextUtils.formatText(secondsLabel, new RelativeSizeSpan(0.5f)));
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(0xffffffff);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(80);
 
-        LayoutInflater.from(context).inflate(R.layout.timer_setup_container, this);
+        knobPaint.setAntiAlias(true);
+        knobPaint.setColor(0xffffffff);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        mTimeView = (TextView) findViewById(R.id.timer_setup_time);
-        mDeleteView = findViewById(R.id.timer_setup_delete);
-        mDividerView = findViewById(R.id.timer_setup_divider);
-        mDigitViews = new TextView[] {
-                (TextView) findViewById(R.id.timer_setup_digit_0),
-                (TextView) findViewById(R.id.timer_setup_digit_1),
-                (TextView) findViewById(R.id.timer_setup_digit_2),
-                (TextView) findViewById(R.id.timer_setup_digit_3),
-                (TextView) findViewById(R.id.timer_setup_digit_4),
-                (TextView) findViewById(R.id.timer_setup_digit_5),
-                (TextView) findViewById(R.id.timer_setup_digit_6),
-                (TextView) findViewById(R.id.timer_setup_digit_7),
-                (TextView) findViewById(R.id.timer_setup_digit_8),
-                (TextView) findViewById(R.id.timer_setup_digit_9),
-        };
-
-        // Tint the divider to match the disabled control color by default and used the activated
-        // control color when there is valid input.
-        final Context dividerContext = mDividerView.getContext();
-        final int colorControlActivated = ThemeUtils.resolveColor(dividerContext,
-                R.attr.colorControlActivated);
-        final int colorControlDisabled = ThemeUtils.resolveColor(dividerContext,
-                R.attr.colorControlNormal, new int[] { ~android.R.attr.state_enabled });
-        ViewCompat.setBackgroundTintList(mDividerView, new ColorStateList(
-                new int[][] { { android.R.attr.state_activated }, {} },
-                new int[] { colorControlActivated, colorControlDisabled }));
-        ViewCompat.setBackgroundTintMode(mDividerView, PorterDuff.Mode.SRC);
-
-        // Initialize the digit buttons.
-        final UiDataModel uidm = UiDataModel.getUiDataModel();
-        for (final TextView digitView : mDigitViews) {
-            final int digit = getDigitForId(digitView.getId());
-            digitView.setText(uidm.getFormattedNumber(digit, 1));
-            digitView.setOnClickListener(this);
-        }
-
-        mDeleteView.setOnClickListener(this);
-        mDeleteView.setOnLongClickListener(this);
-
         updateTime();
-        updateDeleteAndDivider();
     }
 
     public void setFabContainer(FabContainer fabContainer) {
         mFabContainer = fabContainer;
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        View view = null;
-        if (keyCode == KeyEvent.KEYCODE_DEL) {
-            view = mDeleteView;
-        } else if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-            view = mDigitViews[keyCode - KeyEvent.KEYCODE_0];
-        }
-
-        if (view != null) {
-            final boolean result = view.performClick();
-            if (result && hasValidInput()) {
-                mFabContainer.updateFab(FAB_REQUEST_FOCUS);
-            }
-            return result;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view == mDeleteView) {
-            delete();
-        } else {
-            append(getDigitForId(view.getId()));
-        }
-    }
-
-    @Override
-    public boolean onLongClick(View view) {
-        if (view == mDeleteView) {
-            reset();
-            updateFab();
-            return true;
-        }
-        return false;
-    }
-
-    private int getDigitForId(@IdRes int id) {
-        switch (id) {
-            case R.id.timer_setup_digit_0:
-                return 0;
-            case R.id.timer_setup_digit_1:
-                return 1;
-            case R.id.timer_setup_digit_2:
-                return 2;
-            case R.id.timer_setup_digit_3:
-                return 3;
-            case R.id.timer_setup_digit_4:
-                return 4;
-            case R.id.timer_setup_digit_5:
-                return 5;
-            case R.id.timer_setup_digit_6:
-                return 6;
-            case R.id.timer_setup_digit_7:
-                return 7;
-            case R.id.timer_setup_digit_8:
-                return 8;
-            case R.id.timer_setup_digit_9:
-                return 9;
-        }
-        throw new IllegalArgumentException("Invalid id: " + id);
-    }
-
     private void updateTime() {
-        final int seconds = mInput[1] * 10 + mInput[0];
-        final int minutes = mInput[3] * 10 + mInput[2];
-        final int hours = mInput[5] * 10 + mInput[4];
-
-        final UiDataModel uidm = UiDataModel.getUiDataModel();
-        mTimeView.setText(TextUtils.expandTemplate(mTimeTemplate,
-                uidm.getFormattedNumber(hours, 2),
-                uidm.getFormattedNumber(minutes, 2),
-                uidm.getFormattedNumber(seconds, 2)));
-
-        final Resources r = getResources();
-        mTimeView.setContentDescription(r.getString(R.string.timer_setup_description,
-                r.getQuantityString(R.plurals.hours, hours, hours),
-                r.getQuantityString(R.plurals.minutes, minutes, minutes),
-                r.getQuantityString(R.plurals.seconds, seconds, seconds)));
-    }
-
-    private void updateDeleteAndDivider() {
-        final boolean enabled = hasValidInput();
-        mDeleteView.setEnabled(enabled);
-        mDividerView.setActivated(enabled);
-    }
-
-    private void updateFab() {
-        mFabContainer.updateFab(FAB_SHRINK_AND_EXPAND);
-    }
-
-    private void append(int digit) {
-        if (digit < 0 || digit > 9) {
-            throw new IllegalArgumentException("Invalid digit: " + digit);
+        seconds = Math.max(0, seconds);
+        while (seconds > 60) {
+            seconds -= 60;
+            minutes++;
         }
-
-        // Pressing "0" as the first digit does nothing.
-        if (mInputPointer == -1 && digit == 0) {
-            return;
+        minutes = Math.max(0, minutes);
+        while (minutes > 60) {
+            minutes -= 60;
+            hours++;
         }
+        hours = Math.max(0, hours);
 
-        // No space for more digits, so ignore input.
-        if (mInputPointer == mInput.length - 1) {
-            return;
+        if (hasValidInput() != validValue && mFabContainer != null) {
+            validValue = hasValidInput();
+            mFabContainer.updateFab(FAB_SHRINK_AND_EXPAND);
         }
-
-        // Append the new digit.
-        System.arraycopy(mInput, 0, mInput, 1, mInputPointer + 1);
-        mInput[0] = digit;
-        mInputPointer++;
-        updateTime();
-
-        // Update TalkBack to read the number being deleted.
-        mDeleteView.setContentDescription(getContext().getString(
-                R.string.timer_descriptive_delete,
-                UiDataModel.getUiDataModel().getFormattedNumber(digit)));
-
-        // Update the fab, delete, and divider when we have valid input.
-        if (mInputPointer == 0) {
-            updateFab();
-            updateDeleteAndDivider();
-        }
-    }
-
-    private void delete() {
-        // Nothing exists to delete so return.
-        if (mInputPointer < 0) {
-            return;
-        }
-
-        System.arraycopy(mInput, 1, mInput, 0, mInputPointer);
-        mInput[mInputPointer] = 0;
-        mInputPointer--;
-        updateTime();
-
-        // Update TalkBack to read the number being deleted or its original description.
-        if (mInputPointer >= 0) {
-            mDeleteView.setContentDescription(getContext().getString(
-                    R.string.timer_descriptive_delete,
-                    UiDataModel.getUiDataModel().getFormattedNumber(mInput[0])));
-        } else {
-            mDeleteView.setContentDescription(getContext().getString(R.string.timer_delete));
-        }
-
-        // Update the fab, delete, and divider when we no longer have valid input.
-        if (mInputPointer == -1) {
-            updateFab();
-            updateDeleteAndDivider();
-        }
+        invalidate();
     }
 
     public void reset() {
         if (mInputPointer != -1) {
-            Arrays.fill(mInput, 0);
+            hours = 0;
+            minutes = 0;
+            seconds = 0;
             mInputPointer = -1;
             updateTime();
-            updateDeleteAndDivider();
         }
     }
 
     public boolean hasValidInput() {
-        return mInputPointer != -1;
+        return getTimeInMillis() != 0;
     }
 
     public long getTimeInMillis() {
-        final int seconds = mInput[1] * 10 + mInput[0];
-        final int minutes = mInput[3] * 10 + mInput[2];
-        final int hours = mInput[5] * 10 + mInput[4];
         return seconds * DateUtils.SECOND_IN_MILLIS
                 + minutes * DateUtils.MINUTE_IN_MILLIS
                 + hours * DateUtils.HOUR_IN_MILLIS;
@@ -315,7 +141,7 @@ public class TimerSetupView extends LinearLayout implements View.OnClickListener
      * @return an opaque representation of the state of timer setup
      */
     public Serializable getState() {
-        return Arrays.copyOf(mInput, mInput.length);
+        return new int[] {hours, minutes, seconds};
     }
 
     /**
@@ -323,15 +149,84 @@ public class TimerSetupView extends LinearLayout implements View.OnClickListener
      */
     public void setState(Serializable state) {
         final int[] input = (int[]) state;
-        if (input != null && mInput.length == input.length) {
-            for (int i = 0; i < mInput.length; i++) {
-                mInput[i] = input[i];
-                if (mInput[i] != 0) {
-                    mInputPointer = i;
+        if (input != null && input.length == 3) {
+            hours = input[0];
+            minutes = input[1];
+            seconds = input[2];
+            updateTime();
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        int size = Math.min(getWidth(), getHeight()) - 300;
+        arcBounds.set((getWidth() - size) / 2, (getHeight() - size) / 2,
+                getWidth() - (getWidth() - size) / 2, getHeight() - (getHeight() - size) / 2);
+
+        arcPaint.setStrokeWidth(3);
+        arcPaint.setColor(0xffcccccc);
+        canvas.drawArc(arcBounds, 0, 360, false, arcPaint);
+
+        int differenceHourRadius =  30;
+        float hourRadiusDelta = 0;
+
+        if (minutes > 50) {
+            hourRadiusDelta = (1.0f - 0.1f * (60 - minutes)) * differenceHourRadius;
+            arcBounds.left += hourRadiusDelta;
+            arcBounds.right -= hourRadiusDelta;
+            arcBounds.top += hourRadiusDelta;
+            arcBounds.bottom -= hourRadiusDelta;
+        }
+
+        arcPaint.setStrokeWidth(15);
+        arcPaint.setColor(0xffffffff);
+        float angle = ((float) minutes / 60.0f) * 360.0f;
+        canvas.drawArc(arcBounds, -90, angle, false, arcPaint);
+
+        float hoursSize = size / 2 - hourRadiusDelta;
+        for (int i = 0; i < hours; i++) {
+            hoursSize -= differenceHourRadius;
+            canvas.drawCircle(getWidth() / 2, getHeight() / 2, hoursSize, arcPaint);
+        }
+
+        float knobX = (float) (getWidth()/2 + size/2 * Math.sin(-angle * Math.PI / 180 + Math.PI));
+        float knobY = (float) (getHeight()/2 + size/2 * Math.cos(-angle* Math.PI / 180 + Math.PI));
+        canvas.drawCircle(knobX, knobY, 30, knobPaint);
+
+        canvas.drawText(String.format("%02d:%02d:%02d", hours, minutes, seconds), getWidth() / 2,  getHeight() / 2, textPaint);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        getParent().requestDisallowInterceptTouchEvent(true);
+        Point center = new Point(getWidth() / 2, getHeight() / 2);
+        double angleRad = Math.atan2(center.y - event.getY(), center.x - event.getX());
+        float angle = (float) (angleRad * (180 / Math.PI));
+        angle += 360 + 360 - 90;
+        angle %= 360;
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float knobAngle = ((float) minutes / 60.0f) * 360.0f;
+            return Math.abs(angle - knobAngle) < 10;
+        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            int newMinutes = (int) (60 * (angle / 360.0));
+            if (minutes > 45 && newMinutes < 15) {
+                hours++;
+                minutes = newMinutes;
+            } else if (minutes < 15 && newMinutes > 45) {
+                if (hours > 0) {
+                    hours--;
+                    minutes = newMinutes;
                 }
+            } else {
+                minutes = newMinutes;
             }
             updateTime();
-            updateDeleteAndDivider();
+            return true;
+        } else {
+            return super.onTouchEvent(event);
         }
     }
 }
