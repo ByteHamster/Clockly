@@ -18,6 +18,7 @@ public class TimerDrawer extends FrameLayout {
 
     private RectF arcBounds = new RectF();
 
+    protected boolean isNegative = false;
     protected int hours = 0;
     protected int minutes = 0;
     protected int seconds = 0;
@@ -68,7 +69,7 @@ public class TimerDrawer extends FrameLayout {
         for (int i = 0; i < 60; i++) {
             float innerMultiplier = (i % 15 == 0) ? 0.86f : (i % 5 == 0) ? 0.90f : 0.96f;
             Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
-            float outerMultiplier = (i == seconds) ? 1.03f : 0.98f;
+            float outerMultiplier = (i == seconds && !isNegative) ? 1.03f : 0.98f;
             Point p2 = radToPoint(i * 360.f/60.f, radius * outerMultiplier);
             canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
         }
@@ -101,7 +102,8 @@ public class TimerDrawer extends FrameLayout {
             }
         }
 
-        canvas.drawText(String.format("%02d:%02d:%02d", hours, minutes, seconds), getWidth() / 2,  getHeight() / 2, textPaint);
+        canvas.drawText(String.format("%s%02d:%02d:%02d", isNegative ? "-" : "", hours, minutes, seconds),
+                getWidth() / 2,  getHeight() / 2, textPaint);
     }
 
     protected Point radToPoint(float angle, float radius) {
@@ -110,6 +112,8 @@ public class TimerDrawer extends FrameLayout {
     }
 
     public void setTime(long remainingTime) {
+        isNegative = remainingTime < 0;
+        remainingTime = Math.abs(remainingTime);
         hours = (int) ((remainingTime / 1000) / 60 / 60);
         minutes = (int) ((remainingTime / 1000 / 60) % 60);
         seconds = (int) ((remainingTime / 1000) % 60);
