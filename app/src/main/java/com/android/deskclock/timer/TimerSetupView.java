@@ -26,6 +26,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import com.android.deskclock.FabContainer;
+import com.android.deskclock.R;
+import com.android.deskclock.ThemeUtils;
 
 import java.io.Serializable;
 
@@ -63,7 +65,8 @@ public class TimerSetupView extends View {
         textPaint.setTextSize(80);
 
         knobPaint.setAntiAlias(true);
-        knobPaint.setColor(0xffffffff);
+        knobPaint.setColor(ThemeUtils.resolveColor(getContext(), R.attr.colorAccent));
+
     }
 
     @Override
@@ -138,40 +141,57 @@ public class TimerSetupView extends View {
         super.onDraw(canvas);
 
         int size = Math.min(getWidth(), getHeight()) - 300;
+        int radius = size / 2;
         arcBounds.set((getWidth() - size) / 2, (getHeight() - size) / 2,
                 getWidth() - (getWidth() - size) / 2, getHeight() - (getHeight() - size) / 2);
 
         arcPaint.setStrokeWidth(3);
-        arcPaint.setColor(0xffcccccc);
-        canvas.drawArc(arcBounds, 0, 360, false, arcPaint);
+        arcPaint.setColor(0xffbbbbbb);
 
-        int differenceHourRadius =  30;
+        for (int i = 0; i < 60; i++) {
+            float innerMultiplier = (i % 15 == 0) ? 0.85f : (i % 5 == 0) ? 0.92f : 0.98f;
+            Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
+            Point p2 = radToPoint(i * 360.f/60.f, radius * 1.02f);
+            canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
+        }
+
+        int differenceHourRadius =  20;
         float hourRadiusDelta = 0;
 
-        if (minutes > 50) {
-            hourRadiusDelta = (1.0f - 0.1f * (60 - minutes)) * differenceHourRadius;
+        if (minutes > 55) {
+            hourRadiusDelta = (1.0f - 0.2f * (60 - minutes)) * differenceHourRadius;
             arcBounds.left += hourRadiusDelta;
             arcBounds.right -= hourRadiusDelta;
             arcBounds.top += hourRadiusDelta;
             arcBounds.bottom -= hourRadiusDelta;
         }
 
-        arcPaint.setStrokeWidth(15);
+        arcPaint.setStrokeWidth(8);
         arcPaint.setColor(0xffffffff);
         float angle = ((float) minutes / 60.0f) * 360.0f;
         canvas.drawArc(arcBounds, -90, angle, false, arcPaint);
 
-        float hoursSize = size / 2 - hourRadiusDelta;
+        int hourColor = 0xffffffff;
+        float hoursSize = radius - hourRadiusDelta;
         for (int i = 0; i < hours; i++) {
             hoursSize -= differenceHourRadius;
+            arcPaint.setColor(hourColor);
             canvas.drawCircle(getWidth() / 2, getHeight() / 2, hoursSize, arcPaint);
+            hourColor -= 0x20000000;
+            if ((hourColor & 0xf0000000) == 0x10000000) {
+                break;
+            }
         }
 
-        float knobX = (float) (getWidth()/2 + size/2 * Math.sin(-angle * Math.PI / 180 + Math.PI));
-        float knobY = (float) (getHeight()/2 + size/2 * Math.cos(-angle* Math.PI / 180 + Math.PI));
-        canvas.drawCircle(knobX, knobY, 30, knobPaint);
+        Point p = radToPoint(angle, radius);
+        canvas.drawCircle(p.x, p.y, 40, knobPaint);
 
         canvas.drawText(String.format("%02d:%02d:%02d", hours, minutes, seconds), getWidth() / 2,  getHeight() / 2, textPaint);
+    }
+
+    private Point radToPoint(float angle, float radius) {
+        return new Point((int) (getWidth()/2 + radius * Math.sin(-angle * Math.PI / 180 + Math.PI)),
+                    (int) (getHeight()/2 + radius * Math.cos(-angle* Math.PI / 180 + Math.PI)));
     }
 
     @Override
@@ -185,7 +205,8 @@ public class TimerSetupView extends View {
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             float knobAngle = ((float) minutes / 60.0f) * 360.0f;
-            return Math.abs(angle - knobAngle) < 20;
+            float difference = Math.abs(angle - knobAngle);
+            return difference < 15 || difference > (360 - 15);
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             int newMinutes = (int) (60 * (angle / 360.0));
             if (minutes > 45 && newMinutes < 15) {
