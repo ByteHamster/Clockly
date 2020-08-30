@@ -79,6 +79,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     // Views
     private ViewGroup mMainLayout;
     private RecyclerView mRecyclerView;
+    private AlarmCreatorBar alarmCreatorBar;
 
     // Data
     private Loader mCursorLoader;
@@ -115,6 +116,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final View v = inflater.inflate(R.layout.alarm_clock, container, false);
         final Context context = getActivity();
 
+        alarmCreatorBar = v.findViewById(R.id.alarm_creator_bar);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.alarms_recycler_view);
         mLayoutManager = new LinearLayoutManager(context) {
             @Override
@@ -405,7 +407,13 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     private void startCreatingAlarm() {
         // Clear the currently selected alarm.
         mAlarmTimeClickHandler.setSelectedAlarm(null);
-        TimePickerDialogFragment.show(this);
+
+        if (alarmCreatorBar.isSetupRunning()) {
+            mAlarmTimeClickHandler.onTimeSet(alarmCreatorBar.getHours(), alarmCreatorBar.getMinutes());
+            alarmCreatorBar.stopSetup();
+        } else {
+            TimePickerDialogFragment.show(this);
+        }
     }
 
     @Override

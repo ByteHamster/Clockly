@@ -22,6 +22,7 @@
 
     <com.android.deskclock.AlarmRecyclerView
         android:id="@+id/alarms_recycler_view"
+        android:layout_marginStart="32dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -44,5 +45,10 @@
         android:text="@string/no_alarms"
         android:textColor="@color/no_alarms"
         android:visibility="gone" />
+
+    <com.android.deskclock.AlarmCreatorBar
+        android:id="@+id/alarm_creator_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </FrameLayout>
