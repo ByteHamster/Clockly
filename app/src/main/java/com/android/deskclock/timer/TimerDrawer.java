@@ -48,9 +48,9 @@ public class TimerDrawer extends View {
         arcPaint.setColor(0xffaaaaaa);
 
         for (int i = 0; i < 60; i++) {
-            float innerMultiplier = (i % 15 == 0) ? 0.88f : (i % 5 == 0) ? 0.92f : 0.98f;
+            float innerMultiplier = (i % 15 == 0) ? 0.86f : (i % 5 == 0) ? 0.90f : 0.96f;
             Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
-            float outerMultiplier = (i == seconds) ? 1.05f : 1.0f;
+            float outerMultiplier = (i == seconds) ? 1.03f : 0.98f;
             Point p2 = radToPoint(i * 360.f/60.f, radius * outerMultiplier);
             canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
         }
