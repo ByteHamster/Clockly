@@ -17,42 +17,21 @@
 package com.android.deskclock.timer;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
-import android.util.Log;
-import android.view.MotionEvent;
-import androidx.annotation.IdRes;
-import androidx.core.view.ViewCompat;
-import android.text.BidiFormatter;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import com.android.deskclock.FabContainer;
-import com.android.deskclock.FormattedTextUtils;
-import com.android.deskclock.R;
-import com.android.deskclock.ThemeUtils;
-import com.android.deskclock.uidata.UiDataModel;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
-import static com.android.deskclock.FabContainer.FAB_REQUEST_FOCUS;
 import static com.android.deskclock.FabContainer.FAB_SHRINK_AND_EXPAND;
 
 public class TimerSetupView extends View {
-    private int mInputPointer = -1;
     private final Paint arcPaint = new Paint();
     private final Paint textPaint = new Paint();
     private final Paint knobPaint = new Paint();
@@ -118,13 +97,10 @@ public class TimerSetupView extends View {
     }
 
     public void reset() {
-        if (mInputPointer != -1) {
-            hours = 0;
-            minutes = 0;
-            seconds = 0;
-            mInputPointer = -1;
-            updateTime();
-        }
+        hours = 0;
+        minutes = 0;
+        seconds = 0;
+        updateTime();
     }
 
     public boolean hasValidInput() {
