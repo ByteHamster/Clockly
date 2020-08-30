@@ -31,6 +31,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,8 +40,10 @@ import com.android.deskclock.alarms.AlarmUpdateHandler;
 import com.android.deskclock.alarms.ScrollHandler;
 import com.android.deskclock.alarms.TimePickerDialogFragment;
 import com.android.deskclock.alarms.dataadapter.AlarmItemHolder;
+import com.android.deskclock.alarms.dataadapter.AlarmItemViewHolder;
 import com.android.deskclock.alarms.dataadapter.CollapsedAlarmViewHolder;
 import com.android.deskclock.alarms.dataadapter.ExpandedAlarmViewHolder;
+import com.android.deskclock.events.Events;
 import com.android.deskclock.provider.Alarm;
 import com.android.deskclock.provider.AlarmInstance;
 import com.android.deskclock.uidata.UiDataModel;
@@ -181,6 +184,25 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         itemAnimator.setChangeDuration(300L);
         itemAnimator.setMoveDuration(300L);
         mRecyclerView.setItemAnimator(itemAnimator);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                AlarmItemViewHolder alarmHolder = (AlarmItemViewHolder) viewHolder;
+                AlarmItemHolder itemHolder = alarmHolder.getItemHolder();
+
+                removeItem(itemHolder);
+                final Alarm alarm = itemHolder.item;
+                Events.sendAlarmEvent(R.string.action_delete, R.string.label_deskclock);
+                mAlarmUpdateHandler.asyncDeleteAlarm(alarm);
+            }
+        }).attachToRecyclerView(mRecyclerView);
+
         return v;
     }
 
