@@ -209,7 +209,7 @@ public class TimerSetupView extends View {
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             float knobAngle = ((float) minutes / 60.0f) * 360.0f;
-            return Math.abs(angle - knobAngle) < 10;
+            return Math.abs(angle - knobAngle) < 20;
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
             int newMinutes = (int) (60 * (angle / 360.0));
             if (minutes > 45 && newMinutes < 15) {
