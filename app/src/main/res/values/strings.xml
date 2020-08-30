@@ -19,9 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Label shown on launcher icon -->
-    <!-- Label for the this application displayed on-screen when this application must be represented to the user. -->
-    <string name="app_label">Clock</string>
+    <string name="app_label" translatable="false">Clockly</string>
 
     <!-- Setting label on Set alarm screen: Label -->
     <string name="label">Label</string>
