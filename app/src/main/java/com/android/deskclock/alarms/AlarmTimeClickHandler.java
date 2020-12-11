@@ -19,6 +19,8 @@ package com.android.deskclock.alarms;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Vibrator;
 import androidx.fragment.app.Fragment;
 
@@ -134,7 +136,9 @@ public final class AlarmTimeClickHandler {
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popupToast, false);
     }
 
+    Handler debouncer = new Handler(Looper.getMainLooper());
     public void setDayOfWeekEnabled(Alarm alarm, boolean checked, int index) {
+        debouncer.removeCallbacksAndMessages(null);
         final Calendar now = Calendar.getInstance();
         final Calendar oldNextAlarmTime = alarm.getNextAlarmTime(now);
 
@@ -144,7 +148,7 @@ public final class AlarmTimeClickHandler {
         // if the change altered the next scheduled alarm time, tell the user
         final Calendar newNextAlarmTime = alarm.getNextAlarmTime(now);
         final boolean popupToast = !oldNextAlarmTime.equals(newNextAlarmTime);
-        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popupToast, false);
+        debouncer.postDelayed(() -> mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popupToast, false), 500);
     }
 
     public void onDeleteClicked(AlarmItemHolder itemHolder) {
