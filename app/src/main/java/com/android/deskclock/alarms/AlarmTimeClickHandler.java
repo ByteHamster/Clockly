@@ -35,6 +35,7 @@ import com.android.deskclock.provider.AlarmInstance;
 import com.android.deskclock.ringtone.RingtonePickerActivity;
 
 import java.util.Calendar;
+import java.util.function.BiConsumer;
 
 /**
  * Click handler for an alarm time item.
@@ -52,6 +53,7 @@ public final class AlarmTimeClickHandler {
 
     private Alarm mSelectedAlarm;
     private Bundle mPreviousDaysOfWeekMap;
+    private BiConsumer<Integer, Integer> clockClickedHandler;
 
     public AlarmTimeClickHandler(Fragment fragment, Bundle savedState,
             AlarmUpdateHandler alarmUpdateHandler, ScrollHandler smoothScrollController) {
@@ -158,7 +160,7 @@ public final class AlarmTimeClickHandler {
     public void onClockClicked(Alarm alarm) {
         mSelectedAlarm = alarm;
         Events.sendAlarmEvent(R.string.action_set_time, R.string.label_deskclock);
-        TimePickerDialogFragment.show(mFragment, alarm.hour, alarm.minutes);
+        clockClickedHandler.accept(mSelectedAlarm.hour, mSelectedAlarm.minutes);
     }
 
     public void dismissAlarmInstance(AlarmInstance alarmInstance) {
@@ -201,5 +203,9 @@ public final class AlarmTimeClickHandler {
             mAlarmUpdateHandler.asyncUpdateAlarm(mSelectedAlarm, true, false);
             mSelectedAlarm = null;
         }
+    }
+
+    public void setClockClickedHandler(BiConsumer<Integer, Integer> clockClickedHandler) {
+        this.clockClickedHandler = clockClickedHandler;
     }
 }

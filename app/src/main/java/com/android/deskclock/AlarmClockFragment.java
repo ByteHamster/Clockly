@@ -97,6 +97,8 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     private AlarmTimeClickHandler mAlarmTimeClickHandler;
     private LinearLayoutManager mLayoutManager;
 
+    private boolean editingExistingAlarm = false;
+
     /**
      * The public no-arg constructor required by all fragments.
      */
@@ -138,8 +140,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final Drawable noAlarms = Utils.getVectorDrawable(context, R.drawable.ic_noalarms);
         emptyView.setCompoundDrawablesWithIntrinsicBounds(null, noAlarms, null, null);
         mEmptyViewController = new EmptyViewController(mMainLayout, mRecyclerView, emptyView);
-        mAlarmTimeClickHandler = new AlarmTimeClickHandler(this, savedState, mAlarmUpdateHandler,
-                this);
+        mAlarmTimeClickHandler = new AlarmTimeClickHandler(this, savedState, mAlarmUpdateHandler, this);
+        mAlarmTimeClickHandler.setClockClickedHandler((hours, minutes) -> {
+            editingExistingAlarm = true;
+            alarmCreatorBar.startSetup(hours, minutes);
+        });
 
         mItemAdapter = new ItemAdapter<>();
         mItemAdapter.setHasStableIds();
@@ -233,7 +238,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             UiDataModel.getUiDataModel().setSelectedTab(ALARMS);
             if (intent.getBooleanExtra(ALARM_CREATE_NEW_INTENT_EXTRA, false)) {
                 // An external app asked us to create a blank alarm.
-                startCreatingAlarm();
+                alarmCreatorBar.startSetup(12, 0);
             }
 
             // Remove the CREATE_NEW extra now that we've processed it.
@@ -427,8 +432,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     }
 
     private void startCreatingAlarm() {
-        // Clear the currently selected alarm.
-        mAlarmTimeClickHandler.setSelectedAlarm(null);
+        if (!editingExistingAlarm) {
+            // Clear the currently selected alarm.
+            mAlarmTimeClickHandler.setSelectedAlarm(null);
+        }
+        editingExistingAlarm = false;
 
         if (alarmCreatorBar.isSetupRunning()) {
             mAlarmTimeClickHandler.onTimeSet(alarmCreatorBar.getHours(), alarmCreatorBar.getMinutes());

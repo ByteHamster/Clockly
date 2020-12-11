@@ -77,6 +77,13 @@ public class AlarmCreatorBar extends View {
         }
     }
 
+    public void startSetup(int hours, int minutes) {
+        this.hours = hours;
+        this.minutes = minutes;
+        setupRunning = true;
+        invalidate();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float delta = (float) Math.sqrt(Math.pow(touchDown.x - event.getX(), 2)
