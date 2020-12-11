@@ -72,7 +72,7 @@ public class TimerItem extends LinearLayout {
         final boolean blinkOff = SystemClock.elapsedRealtime() % 1000 < 500;
         if (timerDrawer != null) {
             final boolean hideCircle = (timer.isExpired() || timer.isMissed()) && blinkOff;
-            timerDrawer.setVisibility(hideCircle ? INVISIBLE : VISIBLE);
+            timerDrawer.setBlinkVisibility(hideCircle);
         }
 
         // Update some potentially expensive areas of the user interface only on state changes.

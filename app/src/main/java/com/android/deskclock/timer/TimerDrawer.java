@@ -22,6 +22,7 @@ public class TimerDrawer extends FrameLayout {
     protected int hours = 0;
     protected int minutes = 0;
     protected int seconds = 0;
+    private boolean hideCircle = false;
 
     public TimerDrawer(Context context) {
         this(context, null /* attrs */);
@@ -82,12 +83,14 @@ public class TimerDrawer extends FrameLayout {
         arcPaint.setStrokeWidth(3);
         arcPaint.setColor(0xffaaaaaa);
 
-        for (int i = 0; i < 60; i++) {
-            float innerMultiplier = (i % 15 == 0) ? 0.86f : (i % 5 == 0) ? 0.90f : 0.96f;
-            Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
-            float outerMultiplier = (i == seconds && !isNegative) ? 1.03f : 0.98f;
-            Point p2 = radToPoint(i * 360.f/60.f, radius * outerMultiplier);
-            canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
+        if (!hideCircle) {
+            for (int i = 0; i < 60; i++) {
+                float innerMultiplier = (i % 15 == 0) ? 0.86f : (i % 5 == 0) ? 0.90f : 0.96f;
+                Point p1 = radToPoint(i * 360.f/60.f, radius * innerMultiplier);
+                float outerMultiplier = (i == seconds && !isNegative) ? 1.03f : 0.98f;
+                Point p2 = radToPoint(i * 360.f/60.f, radius * outerMultiplier);
+                canvas.drawLine(p1.x, p1.y, p2.x, p2.y, arcPaint);
+            }
         }
 
         int differenceHourRadius =  20;
@@ -134,5 +137,9 @@ public class TimerDrawer extends FrameLayout {
         minutes = (int) ((remainingTime / 1000 / 60) % 60);
         seconds = (int) ((remainingTime / 1000) % 60);
         invalidate();
+    }
+
+    public void setBlinkVisibility(boolean hideCircle) {
+        this.hideCircle = hideCircle;
     }
 }
