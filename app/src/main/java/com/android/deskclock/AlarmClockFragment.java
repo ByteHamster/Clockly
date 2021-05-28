@@ -144,6 +144,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         mAlarmTimeClickHandler.setClockClickedHandler((hours, minutes) -> {
             editingExistingAlarm = true;
             alarmCreatorBar.startSetup(hours, minutes);
+            updateFab(FAB_AND_BUTTONS_IMMEDIATE);
         });
 
         mItemAdapter = new ItemAdapter<>();
@@ -416,8 +417,13 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     @Override
     public void onUpdateFab(@NonNull ImageView fab) {
         fab.setVisibility(View.VISIBLE);
-        fab.setImageResource(R.drawable.ic_add_white_24dp);
-        fab.setContentDescription(fab.getResources().getString(R.string.button_alarms));
+        if (alarmCreatorBar.isSetupRunning()) {
+            fab.setImageResource(R.drawable.ic_checkmark);
+            fab.setContentDescription(fab.getResources().getString(android.R.string.ok));
+        } else {
+            fab.setImageResource(R.drawable.ic_add_white_24dp);
+            fab.setContentDescription(fab.getResources().getString(R.string.button_alarms));
+        }
     }
 
     @Override
@@ -436,6 +442,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         if (alarmCreatorBar.isSetupRunning()) {
             mAlarmTimeClickHandler.onTimeSet(alarmCreatorBar.getHours(), alarmCreatorBar.getMinutes());
             alarmCreatorBar.stopSetup();
+            updateFab(FAB_AND_BUTTONS_IMMEDIATE);
         } else {
             TimePickerDialogFragment.show(this);
         }
