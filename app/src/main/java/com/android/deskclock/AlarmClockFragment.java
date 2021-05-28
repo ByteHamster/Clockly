@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,6 +123,14 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final Context context = getActivity();
 
         alarmCreatorBar = v.findViewById(R.id.alarm_creator_bar);
+        alarmCreatorBar.setOnKeyListener((v1, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                alarmCreatorBar.stopSetup();
+                updateFab(FAB_AND_BUTTONS_IMMEDIATE);
+                return true;
+            }
+            return false;
+        });
         mRecyclerView = (RecyclerView) v.findViewById(R.id.alarms_recycler_view);
         mLayoutManager = new LinearLayoutManager(context) {
             @Override

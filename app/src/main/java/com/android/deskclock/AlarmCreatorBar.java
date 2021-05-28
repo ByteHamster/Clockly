@@ -28,8 +28,8 @@ public class AlarmCreatorBar extends View {
     private final Paint linesPaint = new Paint();
     private final Paint tintPaint = new Paint();
     private final Paint textPaint = new Paint();
-    private float fontSize = 60;
-    private Point touchDown = new Point();
+    private final float fontSize = 60;
+    private final Point touchDown = new Point();
     private boolean isTouching = false;
     private float padding = 10;
 
@@ -43,6 +43,7 @@ public class AlarmCreatorBar extends View {
 
     public AlarmCreatorBar(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setFocusableInTouchMode(true);
 
         linesPaint.setAntiAlias(true);
         linesPaint.setColor(0xccffffff);
@@ -81,6 +82,7 @@ public class AlarmCreatorBar extends View {
         this.hours = hours;
         this.minutes = minutes;
         setupRunning = true;
+        requestFocus();
         invalidate();
     }
 
@@ -99,6 +101,7 @@ public class AlarmCreatorBar extends View {
             if (event.getX() < 60) {
                 setupRunning = true;
                 isTouching = false;
+                requestFocus();
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             if (setupRunning) {
@@ -150,6 +153,7 @@ public class AlarmCreatorBar extends View {
 
     public void stopSetup() {
         setupRunning = false;
+        clearFocus();
         invalidate();
     }
 
