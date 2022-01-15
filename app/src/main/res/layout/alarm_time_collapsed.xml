@@ -31,7 +31,6 @@
         layout="@layout/alarm_time_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/alarm_clock_vertical_margin"
         app:layout_column="0"
         app:layout_gravity="center_vertical"
         app:layout_row="0" />
@@ -51,7 +50,7 @@
 
     <com.android.deskclock.widget.EllipsizeLayout
         android:layout_width="0dp"
-        android:layout_height="@dimen/touch_target_min_size"
+        android:layout_height="40dp"
         android:gravity="center_vertical"
         app:layout_column="0"
         app:layout_columnSpan="3"
@@ -76,7 +75,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="none"
             android:focusable="true"
-            android:maxLines="1"
+            android:singleLine="true"
             android:paddingEnd="@dimen/icon_margin"
             android:paddingStart="@dimen/icon_margin" />
 
@@ -104,7 +103,7 @@
     <ImageButton
         android:id="@+id/arrow"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/touch_target_min_size"
+        android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/expand_alarm"
         android:padding="@dimen/checkbox_start_padding"
