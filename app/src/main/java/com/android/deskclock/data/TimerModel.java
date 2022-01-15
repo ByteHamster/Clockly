@@ -617,7 +617,7 @@ final class TimerModel {
     private Timer doResetOrDeleteTimer(Timer timer, boolean allowDelete,
             @StringRes int eventLabelId) {
         if (allowDelete
-                && (timer.isExpired() || timer.isMissed())
+                && (timer.isExpired() || timer.isMissed() || timer.isPaused())
                 && timer.getDeleteAfterUse()) {
             doRemoveTimer(timer);
             if (eventLabelId != 0) {
