@@ -162,7 +162,6 @@ public class AlarmActivity extends BaseActivity
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(PowerBtnReceiver, filter);
         
-        
         setVolumeControlStream(AudioManager.STREAM_ALARM);
         final long instanceId = AlarmInstance.getId(getIntent().getData());
         mAlarmInstance = AlarmInstance.getInstance(getContentResolver(), instanceId);
