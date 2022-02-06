@@ -308,8 +308,7 @@ public class AlarmActivity extends BaseActivity
                         if (!mAlarmHandled) {
                             if (mPowerBehavior == AlarmVolumeButtonBehavior.SNOOZE) {
                                 snooze();
-                            }
-                            else if (mPowerBehavior == AlarmVolumeButtonBehavior.DISMISS){
+                            } else if (mPowerBehavior == AlarmVolumeButtonBehavior.DISMISS) {
                                 dismiss();
                             }
                         }
