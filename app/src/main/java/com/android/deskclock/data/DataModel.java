@@ -732,7 +732,6 @@ public final class DataModel {
         return mAlarmModel.getAlarmPowerButtonBehavior();
     }
 
-
     /**
      * @return the number of minutes an alarm may ring before it has timed out and becomes missed
      */
