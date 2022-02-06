@@ -75,7 +75,6 @@ final class AlarmModel {
         return mSettingsModel.getAlarmPowerButtonBehavior();
     }
 
-    
     int getAlarmTimeout() {
         return mSettingsModel.getAlarmTimeout();
     }
