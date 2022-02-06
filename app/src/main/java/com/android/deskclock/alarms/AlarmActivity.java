@@ -157,8 +157,7 @@ public class AlarmActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    // Register Power button (screen off) intent receiver
-
+        // Register Power button (screen off) intent receiver
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(PowerBtnReceiver, filter);
