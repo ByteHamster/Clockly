@@ -306,7 +306,6 @@ final class SettingsDAO {
                 throw new IllegalArgumentException("Unknown power button behavior: " + value);
         }
     }
-
     
     /**
      * @return the number of minutes an alarm may ring before it has timed out and becomes missed
