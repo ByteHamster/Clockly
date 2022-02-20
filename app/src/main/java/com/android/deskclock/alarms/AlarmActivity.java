@@ -181,7 +181,7 @@ public class AlarmActivity extends BaseActivity
         // Get the volume/camera button behavior setting
         mVolumeBehavior = DataModel.getDataModel().getAlarmVolumeButtonBehavior();
         
-         // Get the power button behavior setting
+        // Get the power button behavior setting
         mPowerBehavior = DataModel.getDataModel().getAlarmPowerButtonBehavior();
 
         if (Utils.isOOrLater()) {
@@ -300,19 +300,22 @@ public class AlarmActivity extends BaseActivity
     private final BroadcastReceiver PowerBtnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction() != null) {
-                if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)
-                        || intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                    // Power keys dismiss the alarm.
-                        if (!mAlarmHandled) {
-                            if (mPowerBehavior == AlarmVolumeButtonBehavior.SNOOZE) {
-                                snooze();
-                            } else if (mPowerBehavior == AlarmVolumeButtonBehavior.DISMISS) {
-                                dismiss();
-                            }
-                        }
-                }
-        }
+            if (intent == null || intent.getAction() == null) {
+                return;
+            }
+            if (!intent.getAction().equals(Intent.ACTION_SCREEN_OFF)
+                    && !intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                return;
+            }
+            if (mAlarmHandled) {
+                return;
+            }
+            // Power keys dismiss the alarm.
+            if (mPowerBehavior == AlarmVolumeButtonBehavior.SNOOZE) {
+                snooze();
+            } else if (mPowerBehavior == AlarmVolumeButtonBehavior.DISMISS) {
+                dismiss();
+            }
         }
     };
 

@@ -86,7 +86,7 @@
             android:key="volume_button_setting"
             android:title="@string/volume_button_setting_title" />
          
-          <com.android.deskclock.settings.SimpleMenuPreference
+        <com.android.deskclock.settings.SimpleMenuPreference
             android:defaultValue="0"
             android:dialogTitle="@string/power_button_title"
             android:entries="@array/volume_button_setting_entries"

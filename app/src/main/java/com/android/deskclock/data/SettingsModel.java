@@ -125,7 +125,7 @@ final class SettingsModel {
         return SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs);
     }
 
-     AlarmVolumeButtonBehavior getAlarmPowerButtonBehavior() {
+    AlarmVolumeButtonBehavior getAlarmPowerButtonBehavior() {
         return SettingsDAO.getAlarmPowerButtonBehavior(mPrefs);
     }
 
