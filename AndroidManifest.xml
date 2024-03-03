@@ -165,7 +165,7 @@
 
         <provider
             android:name=".provider.ClockProvider"
-            android:authorities="com.android.deskclock"
+            android:authorities="com.android.deskclock.clockly"
             android:directBootAware="true"
             android:exported="false" />
 

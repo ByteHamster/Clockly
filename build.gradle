@@ -24,6 +24,7 @@ android {
     defaultConfig {
         minSdkVersion 27
         targetSdkVersion 33
+        applicationIdSuffix ".clockly"
     }
 
     sourceSets {
