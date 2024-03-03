@@ -35,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,8 +44,10 @@ import com.android.deskclock.alarms.AlarmUpdateHandler;
 import com.android.deskclock.alarms.ScrollHandler;
 import com.android.deskclock.alarms.TimePickerDialogFragment;
 import com.android.deskclock.alarms.dataadapter.AlarmItemHolder;
+import com.android.deskclock.alarms.dataadapter.AlarmItemViewHolder;
 import com.android.deskclock.alarms.dataadapter.CollapsedAlarmViewHolder;
 import com.android.deskclock.alarms.dataadapter.ExpandedAlarmViewHolder;
+import com.android.deskclock.events.Events;
 import com.android.deskclock.provider.Alarm;
 import com.android.deskclock.provider.AlarmInstance;
 import com.android.deskclock.uidata.UiDataModel;
@@ -52,6 +55,7 @@ import com.android.deskclock.widget.EmptyViewController;
 import com.android.deskclock.widget.toast.SnackbarManager;
 import com.android.deskclock.widget.toast.ToastManager;
 import com.google.android.material.snackbar.Snackbar;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -181,6 +185,25 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         itemAnimator.setChangeDuration(150L);
         itemAnimator.setMoveDuration(150L);
         mRecyclerView.setItemAnimator(itemAnimator);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NotNull RecyclerView recyclerView, @NotNull RecyclerView.ViewHolder viewHolder,
+                                  @NotNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int direction) {
+                AlarmItemViewHolder alarmHolder = (AlarmItemViewHolder) viewHolder;
+                AlarmItemHolder itemHolder = alarmHolder.getItemHolder();
+
+                removeItem(itemHolder);
+                final Alarm alarm = itemHolder.item;
+                Events.sendAlarmEvent(R.string.action_delete, R.string.label_deskclock);
+                mAlarmUpdateHandler.asyncDeleteAlarm(alarm);
+            }
+        }).attachToRecyclerView(mRecyclerView);
         return v;
     }
 
