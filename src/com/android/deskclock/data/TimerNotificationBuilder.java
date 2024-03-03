@@ -109,7 +109,7 @@ class TimerNotificationBuilder {
                         .setAction(TimerService.ACTION_RESET_TIMER)
                         .putExtra(TimerService.EXTRA_TIMER_ID, timer.getId());
 
-                final CharSequence title2 = res.getText(R.string.sw_reset_button);
+                final CharSequence title2 = res.getText(R.string.timer_delete);
                 final PendingIntent intent2 = Utils.pendingServiceIntent(context, reset);
                 actions.add(new Action.Builder(null, title2, intent2).build());
             }
@@ -261,7 +261,7 @@ class TimerNotificationBuilder {
                     .setAction(TimerService.ACTION_RESET_TIMER)
                     .putExtra(TimerService.EXTRA_TIMER_ID, timer.getId());
 
-            final CharSequence title1 = res.getText(R.string.timer_reset);
+            final CharSequence title1 = res.getText(R.string.timer_delete);
             final PendingIntent intent1 = Utils.pendingServiceIntent(context, reset);
             action = new Action.Builder(null, title1, intent1).build();
         } else {

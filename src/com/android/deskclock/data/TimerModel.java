@@ -214,7 +214,7 @@ final class TimerModel {
     Timer addTimer(long length, String label, boolean deleteAfterUse) {
         // Create the timer instance.
         Timer timer = new Timer(-1, RESET, length, length, Timer.UNUSED, Timer.UNUSED, length,
-                label, deleteAfterUse);
+                label, true);
 
         // Add the timer to permanent storage.
         timer = TimerDAO.addTimer(mPrefs, timer);
@@ -616,7 +616,7 @@ final class TimerModel {
     private Timer doResetOrDeleteTimer(Timer timer, boolean allowDelete,
             @StringRes int eventLabelId) {
         if (allowDelete
-                && (timer.isExpired() || timer.isMissed())
+                && (timer.isExpired() || timer.isMissed() || timer.isPaused())
                 && timer.getDeleteAfterUse()) {
             doRemoveTimer(timer);
             if (eventLabelId != 0) {
