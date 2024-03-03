@@ -39,7 +39,7 @@ import java.util.Map;
 class TimerAdapter extends RecyclerView.Adapter implements TimerListener {
 
     /** Maps each timer id to the corresponding {@link TimerViewHolder} that draws it. */
-    private final Map<Integer, TimerViewHolder> mHolders = new ArrayMap<>();
+    private final Map<Integer, CircularTimerViewHolder> mHolders = new ArrayMap<>();
     private final TimerClickHandler mTimerClickHandler;
 
     public TimerAdapter(TimerClickHandler timerClickHandler) {
@@ -56,13 +56,13 @@ class TimerAdapter extends RecyclerView.Adapter implements TimerListener {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        final View view = inflater.inflate(R.layout.timer_item, parent, false);
-        return new TimerViewHolder(view, mTimerClickHandler);
+        final View view = inflater.inflate(R.layout.circular_timer_item, parent, false);
+        return new CircularTimerViewHolder(view, mTimerClickHandler);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder itemViewHolder, int position) {
-        TimerViewHolder holder = (TimerViewHolder) itemViewHolder;
+        CircularTimerViewHolder holder = (CircularTimerViewHolder) itemViewHolder;
         mHolders.put(getTimer(position).getId(), holder);
         holder.onBind(getTimer(position).getId());
     }
@@ -88,7 +88,7 @@ class TimerAdapter extends RecyclerView.Adapter implements TimerListener {
      */
     boolean updateTime() {
         boolean continuousUpdates = false;
-        for (TimerViewHolder holder : mHolders.values()) {
+        for (CircularTimerViewHolder holder : mHolders.values()) {
             continuousUpdates |= holder.updateTime();
         }
         return continuousUpdates;

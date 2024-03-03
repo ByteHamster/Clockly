@@ -44,6 +44,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.deskclock.AnimatorUtils;
@@ -74,7 +75,7 @@ public final class TimerFragment extends DeskClockFragment {
     /** Updates the FABs in response to timers being added or removed. */
     private final TimerListener mTimerWatcher = new TimerWatcher();
 
-    private TimerSetupView mCreateTimerView;
+    private CircularTimerSetupView mCreateTimerView;
     private TimerAdapter mAdapter;
     private View mTimersView;
     private View mCurrentView;
@@ -108,6 +109,8 @@ public final class TimerFragment extends DeskClockFragment {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(getLayoutManager(view.getContext()));
+        new PagerSnapHelper().attachToRecyclerView(mRecyclerView);
+        mRecyclerView.addItemDecoration(new LinePagerIndicatorDecoration());
 
         mTimersView = view.findViewById(R.id.timer_view);
         mCreateTimerView = view.findViewById(R.id.timer_setup);
