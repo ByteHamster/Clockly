@@ -16,6 +16,7 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -45,4 +46,8 @@
         android:textColor="@color/no_alarms"
         android:visibility="gone" />
 
+    <com.android.deskclock.widget.QuickAlarmCreator
+        android:id="@+id/quick_alarm_creator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>

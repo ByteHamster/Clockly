@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,7 @@ import com.android.deskclock.events.Events;
 import com.android.deskclock.provider.Alarm;
 import com.android.deskclock.provider.AlarmInstance;
 import com.android.deskclock.uidata.UiDataModel;
+import com.android.deskclock.widget.QuickAlarmCreator;
 import com.android.deskclock.widget.EmptyViewController;
 import com.android.deskclock.widget.toast.SnackbarManager;
 import com.android.deskclock.widget.toast.ToastManager;
@@ -84,12 +86,14 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     // Views
     private ViewGroup mMainLayout;
     private RecyclerView mRecyclerView;
+    private QuickAlarmCreator mQuickAlarmCreator;
 
     // Data
     private CursorLoader mCursorLoader;
     private long mScrollToAlarmId = Alarm.INVALID_ID;
     private long mExpandedAlarmId = Alarm.INVALID_ID;
     private long mCurrentUpdateToken;
+    private boolean editingExistingAlarm = false;
 
     // Controllers
     private ItemAdapter<AlarmItemHolder> mItemAdapter;
@@ -139,8 +143,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final Drawable noAlarms = Utils.getVectorDrawable(context, R.drawable.ic_noalarms);
         emptyView.setCompoundDrawablesWithIntrinsicBounds(null, noAlarms, null, null);
         mEmptyViewController = new EmptyViewController(mMainLayout, mRecyclerView, emptyView);
-        mAlarmTimeClickHandler = new AlarmTimeClickHandler(this, savedState, mAlarmUpdateHandler,
-                this);
+        mAlarmTimeClickHandler = new AlarmTimeClickHandler(this, savedState, mAlarmUpdateHandler, this);
+        mAlarmTimeClickHandler.setClockClickedHandler((hours, minutes) -> {
+            editingExistingAlarm = true;
+            mQuickAlarmCreator.startSetup(hours, minutes);
+        });
 
         mItemAdapter = new ItemAdapter<>();
         mItemAdapter.setHasStableIds();
@@ -204,6 +211,23 @@ public final class AlarmClockFragment extends DeskClockFragment implements
                 mAlarmUpdateHandler.asyncDeleteAlarm(alarm);
             }
         }).attachToRecyclerView(mRecyclerView);
+        mQuickAlarmCreator = v.findViewById(R.id.quick_alarm_creator);
+        mQuickAlarmCreator.setAlarmSelectedListener((hours, minutes) -> {
+            if (!editingExistingAlarm) {
+                // Clear the currently selected alarm.
+                mAlarmTimeClickHandler.setSelectedAlarm(null);
+            }
+            editingExistingAlarm = false;
+            mAlarmTimeClickHandler.onTimeSet(hours, minutes);
+            mQuickAlarmCreator.stopSetup();
+        });
+        mQuickAlarmCreator.setOnKeyListener((v1, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                mQuickAlarmCreator.stopSetup();
+                return true;
+            }
+            return false;
+        });
         return v;
     }
 
@@ -415,7 +439,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
 
     @Override
     public void onUpdateFab(@NonNull ImageView fab) {
-        fab.setVisibility(View.VISIBLE);
+        fab.setVisibility(View.INVISIBLE);
         fab.setImageResource(R.drawable.ic_add_24dp);
         fab.setContentDescription(fab.getResources().getString(R.string.button_alarms));
     }
@@ -428,7 +452,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
 
     @Override
     public int getFabTargetVisibility() {
-        return View.VISIBLE;
+        return View.INVISIBLE;
     }
 
     private void startCreatingAlarm() {
